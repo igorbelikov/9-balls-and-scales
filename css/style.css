@@ -1,0 +1,59 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.container {
+    width: 1000px;
+    padding: 15px;
+    background-color: lightyellow;
+    margin: 0 auto;
+}
+
+/* app */
+.app__content {
+    border: 1px solid lightgoldenrodyellow;
+    margin-top: 15px;
+    height: 600px;
+    position: relative;
+    padding: 15px;
+}
+
+/* controls */
+.app__controls {
+    margin-top: 5px;
+}
+
+/* notify */
+.app__notify {
+    font-size: 24px;
+    text-align: center;
+    margin-top: 100px;
+}
+
+.app__notify-label {
+    border: 1px solid #f2d900;
+    background-color: #ffeb3b;
+    padding: 10px;
+}
+
+.ball {
+    display: inline-block;
+    width: 20px;
+    height: 17px;
+    padding-top: 3px;
+    border-radius: 50%;
+    background-color: lightgreen;
+    font-size: 12px;
+    text-align: center;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.ball.ball--heavy {
+    background-color: mediumseagreen;
+}

@@ -1,0 +1,13 @@
+{
+    "name": "igorbelikov/test-9balls",
+    "authors": [
+        {
+            "name": "Igor Belikov",
+            "email": "work.belka@gmail.com"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "5.5.*"
+    }
+}
