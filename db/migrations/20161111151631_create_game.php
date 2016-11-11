@@ -1,8 +1,9 @@
 <?php
 
+use Phinx\Db\Adapter\PdoAdapter;
 use Phinx\Migration\AbstractMigration;
 
-class Init extends AbstractMigration
+class CreateGame extends AbstractMigration
 {
     /**
      * Change Method.
@@ -29,10 +30,9 @@ class Init extends AbstractMigration
     {
         $table = $this->table('game');
         $table
-            ->addColumn('created', 'integer')
+            ->addColumn('created', PdoAdapter::PHINX_TYPE_STRING)
             ->create();
     }
-
     /**
      * Migrate Down.
      */

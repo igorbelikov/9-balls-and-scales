@@ -19,11 +19,49 @@
 
         <!-- app container -->
         <div id="app" class="app__content">
-            <div class="step-1" style="display: none">
-                <h4 class="step__title">Step 1</h4>
-                <div class="step__description">You can change "heavy" ball yourself.</div>
-                <div class="balls"></div>
+            <div class="steps">
+                <!-- step 1 -->
+                <div class="step step-1">
+                    <h4 class="step__title">Step 1</h4>
+                    <div class="step__description">You can change "heavy" ball yourself (click on the ball).</div>
+                    <div class="balls"></div>
+
+                    <!-- step help message -->
+                    <div class="steps__help">Click on the "Next step" button to continue</div>
+                </div>
+
+                <!-- step 2 -->
+                <div class="step step-2">
+                    <h4 class="step__title">Step 2</h4>
+                    <div class="step__description">Now we divide the balls into 3 groups.</div>
+                    <div class="balls"></div>
+                </div>
+
+                <!-- step 3 -->
+                <div class="step step-3">
+                    <h4 class="step__title">Step 3</h4>
+                    <div class="step__description">Now we compare the first 2 groups <u>(first comparison)</u>.</div>
+                    <div class="balls"></div>
+                </div>
+
+                <!-- step 4 -->
+                <div class="step step-4">
+                    <h4 class="step__title">Step 4</h4>
+                    <div class="step__description">Now we compare the first 2 groups <u>(second comparison)</u>.</div>
+                    <div class="balls"></div>
+                </div>
+
+                <!-- step 5 -->
+                <div class="step step-5">
+                    <h4 class="step__title">Step 5</h4>
+                    <div class="step__description">Result: heavy ball is number <strong class="js__heavy-ball">0</strong></div>
+                    <div class="balls"></div>
+
+                    <!-- step help message -->
+                    <div class="steps__help">Congratulations! :-)</div>
+                </div>
             </div>
+
             <div class="app__notify app__notify--start"><span class="app__notify-label">To start the game, click on the "Start" button</span></div>
         </div>
     </div>

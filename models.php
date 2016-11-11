@@ -1,10 +1,115 @@
 <?php
 
 /**
+ * Class Game
+ */
+class Game
+{
+    /**
+     * @var int
+     */
+    public $id;
+
+    /**
+     * @var BallManager
+     */
+    public $ballManager;
+
+    /**
+     * @var GameLog
+     */
+    public $log;
+
+    /**
+     * Game constructor.
+     * @param BallManager $ballManager
+     * @param GameLog $log
+     */
+    public function __construct($ballManager, $log)
+    {
+        $this->ballManager = $ballManager;
+        $this->log = $log;
+    }
+
+    /**
+     * @return bool
+     */
+    public function start()
+    {
+        $id = $this->log->createGame();
+        if ($id) {
+            $this->id = $id;
+            $_SESSION['gameId'] = $this->id;
+            return $this->log->createAction(GameLog::ACTION_START, $this->getId());
+        }
+        return false;
+    }
+
+    public function markAsHeavy($index)
+    {
+        if ($this->ballManager->markAsHeavy($index)) {
+            $this->log->createAction(GameLog::ACTION_CHANGE_HEAVY_BALL, $this->getId());
+        }
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return isset($_SESSION['gameId']) ? $_SESSION['gameId'] : $this->id;
+    }
+}
+
+/**
+ * Class Scales
+ */
+class Scales
+{
+    /**
+     * @param Ball[] $balls1
+     * @param Ball[] $balls2
+     * @return Ball[]|bool
+     */
+    protected function prepareWeight($balls1, $balls2)
+    {
+        foreach ($balls1 as $ball) {
+            if ($ball->isHeavy) {
+                return $balls1;
+            }
+        }
+
+        foreach ($balls2 as $ball) {
+            if ($ball->isHeavy) {
+                return $balls2;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array $a
+     * @param array $a
+     * @return array|bool
+     */
+    public function weigh(array $a, array $b)
+    {
+        return $this->prepareWeight($a, $b);
+    }
+}
+
+/**
  * Class Log
  */
-class Log
+class GameLog
 {
+    const ACTION_START = 1;
+    const ACTION_REPLAY = 2;
+    const ACTION_NEXT_STEP = 3;
+    const ACTION_CHANGE_HEAVY_BALL = 4;
+    const ACTION_END = 5;
+
     /**
      * @var PDO
      */
@@ -21,7 +126,7 @@ class Log
 
     /**
      * @param null|int $created
-     * @return bool
+     * @return bool|string
      */
     public function createGame($created = null)
     {
@@ -30,7 +135,45 @@ class Log
         }
         $stmt = $this->db->prepare('INSERT INTO game(created) VALUES(:created)');
         $stmt->bindParam(':created', $created, PDO::PARAM_INT);
+        if ($stmt->execute()) {
+            return $this->db->lastInsertId();
+        }
+        return false;
+    }
+
+    /**
+     * @param int $action
+     * @param int $gameId
+     * @return bool
+     */
+    public function createAction($action, $gameId)
+    {
+        $stmt = $this->db->prepare('INSERT INTO action(game_id, action, created) VALUES(:gameId, :action, :created)');
+        $stmt->bindParam(':gameId', $gameId, PDO::PARAM_INT);
+        $stmt->bindParam(':action', $action, PDO::PARAM_INT);
+        $stmt->bindParam(':created', time(), PDO::PARAM_INT);
         return $stmt->execute();
+    }
+
+    /**
+     * @param null $key
+     * @return array|string|null
+     */
+    public static function getLabels($key = null)
+    {
+        $labels = [
+            self::ACTION_START => 'Start game.',
+            self::ACTION_REPLAY => 'Replay game.',
+            self::ACTION_NEXT_STEP => 'Go to next step.',
+            self::ACTION_CHANGE_HEAVY_BALL => 'Change heavy ball.',
+            self::ACTION_END => 'End game.',
+        ];
+
+        if ($key === null) {
+            return $labels;
+        }
+
+        return isset($labels[$key]) ? $labels[$key] : null;
     }
 }
 
@@ -61,6 +204,14 @@ class Response
     }
 
     /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->prepareResponse();
+    }
+
+    /**
      * @return array
      */
     public function generateData()
@@ -74,7 +225,7 @@ class Response
     /**
      * @return string
      */
-    public function __toString()
+    protected function prepareResponse()
     {
         header('Content-Type: application/json');
         return json_encode($this->generateData());

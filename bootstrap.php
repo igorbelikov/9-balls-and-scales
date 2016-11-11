@@ -9,6 +9,8 @@
 // - тест на успешный результат
 // - тест на успешную запись результатов в БД
 
+session_start();
+
 require_once 'vendor/autoload.php';
 
 use Symfony\Component\Yaml\Yaml;
@@ -18,8 +20,7 @@ $dbConfig = $phinxConfig['environments'][$phinxConfig['environments']['default_d
 
 $db = new \PDO($dbConfig['adapter'] . ':dbname=' . $dbConfig['name'] . ';host=' . $dbConfig['host'], $dbConfig['user'], $dbConfig['pass']);
 
-$log = new Log($db);
-$manager = new BallManager();
+$game = new Game(new BallManager(), new GameLog($db));
 
 // ajax handlers
 require_once 'handlers.php';
