@@ -1,6 +1,40 @@
 <?php
 
 /**
+ * Class Log
+ */
+class Log
+{
+    /**
+     * @var PDO
+     */
+    public $db;
+
+    /**
+     * Log constructor.
+     * @param $db
+     */
+    public function __construct($db)
+    {
+        $this->db = $db;
+    }
+
+    /**
+     * @param null|int $created
+     * @return bool
+     */
+    public function createGame($created = null)
+    {
+        if ($created === null) {
+            $created = time();
+        }
+        $stmt = $this->db->prepare('INSERT INTO game(created) VALUES(:created)');
+        $stmt->bindParam(':created', $created, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+}
+
+/**
  * Class Response
  */
 class Response
@@ -27,16 +61,23 @@ class Response
     }
 
     /**
+     * @return array
+     */
+    public function generateData()
+    {
+        return [
+            'success' => true,
+            'data' => $this->data,
+        ];
+    }
+
+    /**
      * @return string
      */
     public function __toString()
     {
         header('Content-Type: application/json');
-        $data = [
-            'success' => true,
-            'data' => $this->data,
-        ];
-        return json_encode($data);
+        return json_encode($this->generateData());
     }
 }
 
@@ -58,6 +99,16 @@ class Ball
     {
         $this->isHeavy = $isHeavy;
     }
+
+    /**
+     * @param bool $isHeavy
+     * @return $this
+     */
+    public function setIsHeavy($isHeavy = false)
+    {
+        $this->isHeavy = $isHeavy;
+        return $this;
+    }
 }
 
 /**
@@ -66,7 +117,7 @@ class Ball
 class BallManager
 {
     /**
-     * @var array
+     * @var Ball[]
      */
     public $balls = [];
 
@@ -75,18 +126,69 @@ class BallManager
      */
     public function __construct()
     {
-        $this->balls = $this->generateBalls();
+        $this->reset();
+    }
+
+    /**
+     * @return $this
+     */
+    public function reset()
+    {
+        $this->balls = $this->generate();
+        return $this;
     }
 
     /**
      * @return Ball[]
      */
-    private function generateBalls()
+    public function generate()
     {
-        $balls = array_fill(0, 8, new Ball());
+        for ($i = 0; $i < 8; $i++) {
+            $balls[] = new Ball();
+        }
         $balls[] = new Ball(true);
         shuffle($balls);
 
         return $balls;
+    }
+
+    /**
+     * @return Ball|null
+     */
+    public function getHeavy()
+    {
+        foreach ($this->balls as $index => &$ball) {
+            if ($ball->isHeavy) {
+                return $ball;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function clearHeavy()
+    {
+        $heavyBall = $this->getHeavy();
+        if ($heavyBall) {
+            $heavyBall->setIsHeavy(false);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param int $index
+     * @return bool
+     */
+    public function markAsHeavy($index)
+    {
+        $this->clearHeavy();
+        if (isset($this->balls[$index])) {
+            $this->balls[$index]->setIsHeavy(true);
+            return $index;
+        }
+        return false;
     }
 }

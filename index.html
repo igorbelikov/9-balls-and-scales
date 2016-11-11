@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Igor B - 9 balls</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="public/css/style.css">
 </head>
 <body>
     <div class="container">
@@ -13,16 +13,22 @@
             <div class="app__controls">
                 <button id="start">Start</button>
                 <button id="replay" disabled>Replay</button>
+                <button id="next" disabled>Next step</button>
             </div>
         </div>
 
         <!-- app container -->
         <div id="app" class="app__content">
-            <div class="balls"></div>
+            <div class="step-1" style="display: none">
+                <h4 class="step__title">Step 1</h4>
+                <div class="step__description">You can change "heavy" ball yourself.</div>
+                <div class="balls"></div>
+            </div>
             <div class="app__notify app__notify--start"><span class="app__notify-label">To start the game, click on the "Start" button</span></div>
         </div>
     </div>
+
     <script src="bower_components/jquery/dist/jquery.js"></script>
-    <script src="js/app.js"></script>
+    <script src="public/js/app.js"></script>
 </body>
 </html>

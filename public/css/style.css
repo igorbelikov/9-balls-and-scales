@@ -1,3 +1,4 @@
+/* general */
 * {
     margin: 0;
     padding: 0;
@@ -41,7 +42,14 @@ body, html {
     padding: 10px;
 }
 
+/* balls */
+.balls {
+    position: relative;
+}
+
+/* simple ball */
 .ball {
+    cursor: pointer;
     display: inline-block;
     width: 20px;
     height: 17px;
@@ -54,6 +62,48 @@ body, html {
     margin-bottom: 10px;
 }
 
+.ball:before,
+.ball:after {
+    position: absolute;
+    color: #cecece;
+    top: 10px;
+    opacity: 0;
+    -webkit-transition: all .2s linear;
+    -moz-transition: all .2s linear;
+    -ms-transition: all .2s linear;
+    -o-transition: all .2s linear;
+    transition: all .2s linear;
+}
+
+.ball:before {
+    content: "↑";
+    font-size: 18px;
+}
+.ball:after {
+    content: "Heavy :-)";
+    margin-left: -22px;
+}
+
+/* heavy ball */
 .ball.ball--heavy {
     background-color: mediumseagreen;
+}
+
+.ball.ball--heavy:before,
+.ball.ball--heavy:after {
+    opacity: 1;
+}
+
+.ball.ball--heavy:before {
+    top: 25px;
+}
+.ball.ball--heavy:after {
+    top: 50px;
+}
+
+/* step */
+.step__title {}
+.step__description {
+    color: #cecece;
+    margin: 10px 0;
 }
