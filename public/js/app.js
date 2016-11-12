@@ -27,25 +27,82 @@
         params.action = action;
         $.post('bootstrap.php', params, function (response) {
             if (response.success) {
-                callback.call(this, response, response.data)
+                callback.call(this, response.data, response)
             } else {
                 notify('Error!');
             }
         }, 'json');
     }
 
+    /**
+     * @param ball
+     * @param index
+     * @param list
+     * @returns {Array}
+     */
+    function createBall(ball, index, list) {
+        list = list || balls;
+        var $ball = $('<div class="ball">');
+        if (ball.isHeavy) {
+            $ball.addClass('ball--heavy');
+        }
+        ball.index = index;
+        list.push({
+            $el: $ball,
+            ball: ball
+        });
+        return list;
+    }
+
+    /**
+     * @param $container
+     * @param list
+     */
+    function draw($container, list) {
+        list = list || balls;
+        var $balls = $container.find('.balls').empty();
+        $(list).each(function (index, ball) {
+            ball.$el.text(typeof ball.ball.index === "undefined" ? index : ball.ball.index);
+            $balls.append(ball.$el.clone());
+        });
+    }
+
+    /**
+     * @param list
+     */
+    function refreshBalls(list) {
+        balls = [];
+        $(list).each(function (index, ball) {
+            createBall(ball, typeof ball.index === "undefined" ? index : ball.index);
+        });
+    }
+
+    /**
+     * @param ballsList
+     */
+    function prepareColors(ballsList) {
+        $(ballsList).each(function (index, ball) {
+            if (ball.ball.index < 3) {
+                ball.$el.addClass('ball--group-1');
+            } else if (ball.ball.index < 6) {
+                ball.$el.addClass('ball--group-2');
+            }
+        });
+    }
+
+    /**
+     * @param callback
+     * @param replay
+     */
     function nextStep(callback, replay) {
         replay = replay || 0;
         if (replay) {
             step = 1;
         }
 
-        var $steps = $('.step'),
-            $currentStep = $('.step-' + step),
+        var $steps = $('.step').removeClass('step--current'),
+            $currentStep = $('.step-' + step).addClass('step--current'),
             $stepResult = $currentStep.find('.step__result');
-
-        $steps.removeClass('step--current');
-        $currentStep.addClass('step--current');
 
         if (step > 1) {
             $currentStep.fadeIn();
@@ -61,14 +118,14 @@
                     $('#start').prop('disabled', true);
                     $('#replay').prop('disabled', false);
                     $('#next').prop('disabled', false);
-                    sendRequest('start', {replay: replay}, function (response, data) {
+                    sendRequest('start', {replay: replay}, function (data) {
                         $('.app__notify--start').fadeOut(function () {
                             $('.step-1').fadeIn(function () {
                                 if (typeof callback !== "undefined") {
                                     callback.call(this, data);
                                 }
                             });
-                            gameId = response.data.gameId;
+                            gameId = data.gameId;
                             refreshBalls(data.balls);
                             draw($currentStep);
                         });
@@ -84,21 +141,23 @@
                     balls2: JSON.stringify(balls.slice(3, 6).map(function (ball) {
                         return ball.ball;
                     })),
-                }, function (response, data) {
-                    if (data.balls === true) {
+                }, function (data) {
+                    if (data.balls.length === 0) {
                         $stepResult.find('.variant-equal').fadeIn();
-                        refreshBalls(balls.slice(6, 9))
+                        refreshBalls(balls.slice(6, 9).map(function (ball) {
+                            return ball.ball;
+                        }));
                     } else {
                         refreshBalls(data.balls);
                         prepareColors(balls);
                         draw($stepResult);
                         $stepResult.find('.variant-balls').fadeIn();
-                        $(balls).each(function (index, ball) {
-                            if (index > 1) {
-                                ball.$el.addClass('ball--group-3');
-                            }
-                        });
                     }
+                    $(balls).each(function (index, ball) {
+                        if (index > 1) {
+                            ball.$el.addClass('ball--group-3');
+                        }
+                    });
                 });
                 $currentStep.find('.ball').each(function (index, el) {
                     if (index > 5) {
@@ -119,13 +178,11 @@
             case 4:
                 sendRequest('weigh', {
                     balls1: JSON.stringify([balls[0].ball]),
-                    balls2: JSON.stringify([balls[1].ball]),
-                }, function (response, data) {
-                    if (data.balls === true) {
+                    balls2: JSON.stringify([balls[1].ball])
+                }, function (data) {
+                    if (data.balls.length === 0) {
                         $stepResult.find('.variant-equal').fadeIn();
-                        var tBall = balls[2];
-                        balls = [];
-                        createBall(tBall.ball, tBall.ball.index);
+                        balls = createBall(balls[2].ball, balls[2].ball.index, []);
                         prepareColors(balls);
                         $('.js__heavy-ball').text(tBall.ball.index);
                     } else {
@@ -145,69 +202,6 @@
         }
     }
 
-    /**
-     * @param ball
-     * @param index
-     * @param ballsList
-     */
-    function createBall(ball, index, ballsList) {
-        ballsList = ballsList || balls;
-        var $ball = $('<div class="ball">');
-        if (ball.isHeavy) {
-            $ball.addClass('ball--heavy');
-        }
-        ball.index = index;
-        ballsList.push({
-            $el: $ball,
-            ball: ball
-        });
-    }
-
-    /**
-     * @param $container
-     * @param ballsList
-     */
-    function draw($container, ballsList) {
-        ballsList = ballsList || balls;
-        var $balls = $container.find('.balls');
-        $balls.empty();
-        $(ballsList).each(function (index, ball) {
-            if (typeof ball.ball.index === "undefined") {
-                ball.$el.text(index);
-            } else {
-                ball.$el.text(ball.ball.index);
-            }
-            $balls.append(ball.$el.clone());
-        });
-    }
-
-    /**
-     * @param ballsList
-     */
-    function refreshBalls(ballsList) {
-        balls = [];
-        $(ballsList).each(function (index, ball) {
-            if (typeof ball.index === "undefined") {
-                createBall(ball, index);
-            } else {
-                createBall(ball, ball.index);
-            }
-        });
-    }
-
-    /**
-     * @param ballsList
-     */
-    function prepareColors(ballsList) {
-        $(ballsList).each(function (index, ball) {
-            if (ball.ball.index < 3) {
-                ball.$el.addClass('ball--group-1');
-            } else if (ball.ball.index < 6) {
-                ball.$el.addClass('ball--group-2');
-            }
-        });
-    }
-
     $(function () {
         $('.balls').on('click', '.ball', function () {
             if ($(this).hasClass('ball--heavy') || $('.step-2').is(':visible')) {
@@ -220,15 +214,15 @@
             sendRequest('mark-as-heavy', {
                 gameId: gameId,
                 index: parseInt($(this).text())
-            }, function (response, data) {
+            }, function (data) {
                 notify('Action "' + data.actionLabel + '" is saved.');
                 refreshBalls(data.balls);
             });
         });
 
         $('#replay').click(function () {
-            $('.variant').fadeOut();
             nextStep(function (data) {
+                $('.variant').fadeOut();
                 notify('Action "' + data.actionLabel + '" is saved.<br>Game #' + data.gameId);
             }, true);
         });

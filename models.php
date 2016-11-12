@@ -75,7 +75,7 @@ class Scales
     /**
      * @param Ball[] $balls1
      * @param Ball[] $balls2
-     * @return Ball[]|bool
+     * @return Ball[]
      */
     protected function prepareWeight($balls1, $balls2)
     {
@@ -91,7 +91,7 @@ class Scales
             }
         }
 
-        return true;
+        return [];
     }
 
     /**
