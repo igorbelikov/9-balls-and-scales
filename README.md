@@ -14,7 +14,11 @@ Install:
 
 2. `bower install`
 
-3. edit phinx.yml config and run `vendor/bin/phinx migrate`
+3. `vendor/bin/phinx init`
+
+5. edit phinx.yml config
+
+4. `vendor/bin/phinx migrate`
 
 Test:
 
