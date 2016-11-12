@@ -2,19 +2,88 @@
 (function () {
     "use strict";
 
-    var balls = [],
-        step = 1,
-        gameId = null;
+    var ballsList,
+        ballsDraw,
+        balls = [],
+        step = 1;
+
+    /**
+     * @param {BallsList} ballsList
+     * @constructor
+     */
+    function Draw(ballsList) {
+        this.ballsList = ballsList;
+    }
+
+    Draw.prototype.render = function ($container) {
+        $container.empty();
+        $(this.ballsList.balls).each(function (index, ball) {
+            ball.$el.text(ball.index);
+            $container.append(ball.$el.clone());
+        });
+    }
+
+    /**
+     * @param isHeavy
+     * @param index
+     * @constructor
+     */
+    function Ball(isHeavy, index) {
+        this.isHeavy = isHeavy;
+        this.index = index;
+
+        this.$el = this.render();
+    }
+
+    Ball.prototype.data = function () {
+        return {
+            isHeavy: this.isHeavy,
+            index: this.index
+        };
+    };
+
+    Ball.prototype.render = function () {
+        var $el = $('<div class="ball">');
+        if (this.isHeavy) {
+            $el.addClass('ball--heavy');
+        }
+        return $el;
+    };
+
+    /**
+     * @param {Array} balls
+     * @constructor
+     */
+    function BallsList(balls) {
+        this.loadBalls(balls);
+    }
+
+    BallsList.prototype.prepareBalls = function (balls) {
+        return balls.map(function(ball, index) {
+            return new Ball(ball.isHeavy, index);
+        });
+    }
+
+    BallsList.prototype.loadBalls = function (balls) {
+        this.balls = this.prepareBalls(balls);
+        return this;
+    };
+
+    BallsList.prototype.paint = function () {
+        $(this.balls).each(function (index, ball) {
+            if (ball.index < 3) {
+                ball.$el.addClass('ball--group-1');
+            } else if (ball.index < 6) {
+                ball.$el.addClass('ball--group-2');
+            }
+        });
+    }
 
     /**
      * @param text
      */
     function notify(text) {
-        $.notiny({
-            text: text,
-            position: 'right-top',
-            theme: 'light'
-        });
+        $.notiny({text: text, position: 'right-top', theme: 'light'});
     }
 
     /**
@@ -106,7 +175,7 @@
 
         if (step > 1) {
             $currentStep.fadeIn();
-            draw($currentStep);
+            // draw($currentStep);
             $('.steps')
                 .removeClass('steps--step-' + (step - 1))
                 .addClass('steps--step-' + step);
@@ -116,8 +185,7 @@
             case 1:
                 $steps.fadeOut().promise().done(function () {
                     $('#start').prop('disabled', true);
-                    $('#replay').prop('disabled', false);
-                    $('#next').prop('disabled', false);
+                    $('#replay, #next').prop('disabled', false);
                     sendRequest('start', {replay: replay}, function (data) {
                         $('.app__notify--start').fadeOut(function () {
                             $('.step-1').fadeIn(function () {
@@ -125,9 +193,11 @@
                                     callback.call(this, data);
                                 }
                             });
-                            gameId = data.gameId;
-                            refreshBalls(data.balls);
-                            draw($currentStep);
+                            ballsList = new BallsList(data.balls);
+                            ballsDraw = new Draw(ballsList);
+                            ballsDraw.render($currentStep.find('.balls'));
+                            // refreshBalls(data.balls);
+                            // draw($currentStep);
                         });
                     });
                 });
@@ -144,13 +214,15 @@
                 }, function (data) {
                     if (data.balls.length === 0) {
                         $stepResult.find('.variant-equal').fadeIn();
-                        refreshBalls(balls.slice(6, 9).map(function (ball) {
-                            return ball.ball;
-                        }));
+                        // refreshBalls(balls.slice(6, 9).map(function (ball) {
+                        //     return ball.ball;
+                        // }));
                     } else {
-                        refreshBalls(data.balls);
-                        prepareColors(balls);
-                        draw($stepResult);
+                        ballsList.loadBalls(data.balls).paint();
+                        ballsDraw.render($currentStep.find('.balls'));
+                        // refreshBalls(data.balls);
+                        // prepareColors(balls);
+                        // draw($stepResult);
                         $stepResult.find('.variant-balls').fadeIn();
                     }
                     $(balls).each(function (index, ball) {
@@ -212,7 +284,6 @@
             $(this).addClass('ball--heavy');
 
             sendRequest('mark-as-heavy', {
-                gameId: gameId,
                 index: parseInt($(this).text())
             }, function (data) {
                 notify('Action "' + data.actionLabel + '" is saved.');
