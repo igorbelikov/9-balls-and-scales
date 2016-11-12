@@ -32,24 +32,30 @@ class Game
     }
 
     /**
+     * @param bool $replay
      * @return bool
      */
-    public function start()
+    public function start($replay = false)
     {
         $id = $this->log->createGame();
         if ($id) {
             $this->id = $id;
             $_SESSION['gameId'] = $this->id;
-            return $this->log->createAction(GameLog::ACTION_START, $this->getId());
+            return $this->log->createAction($replay ? GameLog::ACTION_REPLAY : GameLog::ACTION_START, $this->getId());
         }
         return false;
     }
 
+    /**
+     * @param $index
+     * @return bool
+     */
     public function markAsHeavy($index)
     {
         if ($this->ballManager->markAsHeavy($index)) {
-            $this->log->createAction(GameLog::ACTION_CHANGE_HEAVY_BALL, $this->getId());
+            return $this->log->createAction(GameLog::ACTION_CHANGE_HEAVY_BALL, $this->getId());
         }
+        return false;
     }
 
     /**

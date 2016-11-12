@@ -16,6 +16,11 @@ body, html {
 }
 
 /* app */
+.app__description {
+    font-size: 14px;
+    color: #444;
+}
+
 .app__content {
     border: 1px solid lightgoldenrodyellow;
     margin-top: 15px;
@@ -49,6 +54,7 @@ body, html {
 
 /* simple ball */
 .ball {
+    position: relative;
     cursor: pointer;
     display: inline-block;
     width: 20px;
@@ -62,14 +68,22 @@ body, html {
     margin-bottom: 10px;
 }
 
+.ball.ball--group-1 {
+    background-color: #ff9393;
+}
+.ball.ball--group-2 {
+    background-color: #6cbcff;
+}
+.ball.ball--group-3 {
+    opacity: .5;
+}
+
 .ball:before,
 .ball:after {
     position: absolute;
     color: #cecece;
     top: 10px;
     opacity: 0;
-    width: 54px;
-    margin-left: -23px;
     -webkit-transition: all .2s linear;
     -moz-transition: all .2s linear;
     -ms-transition: all .2s linear;
@@ -80,14 +94,17 @@ body, html {
 .ball:before {
     content: "↑";
     font-size: 18px;
+    left: 5px;
 }
 .ball:after {
     content: "Heavy :-)";
+    left: -10px;
+    width: 50px;
 }
 
 /* heavy ball */
 .ball.ball--heavy {
-    background-color: mediumseagreen;
+    box-shadow: 0px 4px 12px #b9b9b9;
 }
 
 .ball.ball--heavy:before,
@@ -118,9 +135,27 @@ body, html {
     font-weight: 100;
 }
 
+.step:first-child {
+    margin-top: 0;
+}
+
 .step {
     display: none;
-    margin-bottom: 100px;
+    margin-top: 60px;
+}
+
+.step.step--current {
+    margin-bottom: 80px;
+}
+
+.step__result {
+    margin-top: 50px;
+}
+.variant {
+    display: none;
+}
+.step__result .balls {
+    margin-top: 10px;
 }
 
 .step__title {}
