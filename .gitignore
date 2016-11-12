@@ -59,3 +59,4 @@ bower_components/
 build/
 dist/
 .idea
+phinx.yml
