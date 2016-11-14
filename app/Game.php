@@ -61,6 +61,15 @@ class Game
     }
 
     /**
+     * @return bool
+     */
+    public function end()
+    {
+        $action = $this->log->createAction(GameLog::ACTION_END, $this->getId());
+        return $action;
+    }
+
+    /**
      * @return int
      */
     public function getId()
