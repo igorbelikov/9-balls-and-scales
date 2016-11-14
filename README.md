@@ -10,6 +10,8 @@ http://dev.ibelik.com/9balls/
 Screenshot:
 ![alt tag](http://dev.ibelik.com/9balls/screenshoot.png)
 
+Screenshot, scheme and dump located in the `data` directory.
+
 Install:
 
 1. `composer install`
