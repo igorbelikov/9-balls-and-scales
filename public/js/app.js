@@ -2,22 +2,20 @@
 (function () {
     "use strict";
 
-    var ballsList,
-        ballsDraw,
-        balls = [],
-        step = 1;
+    var draw,
+        currentStep = 1;
 
     /**
      * @param {BallsList} ballsList
      * @constructor
      */
     function Draw(ballsList) {
-        this.ballsList = ballsList;
+        this.list = ballsList;
     }
 
     Draw.prototype.render = function ($container) {
         $container.empty();
-        $(this.ballsList.balls).each(function (index, ball) {
+        $(this.list.balls).each(function (index, ball) {
             ball.$el.text(ball.index);
             $container.append(ball.$el.clone());
         });
@@ -58,14 +56,20 @@
         this.loadBalls(balls);
     }
 
-    BallsList.prototype.prepareBalls = function (balls) {
-        return balls.map(function(ball, index) {
-            return new Ball(ball.isHeavy, index);
+    BallsList.prototype.data = function () {
+        return this.balls.map(function(ball, index) {
+            return ball.data();
         });
+    };
+
+    BallsList.prototype.part = function (start, end) {
+        return new BallsList(this.balls.slice(start, end));
     }
 
     BallsList.prototype.loadBalls = function (balls) {
-        this.balls = this.prepareBalls(balls);
+        this.balls = balls.map(function(ball, index) {
+            return ball instanceof Ball ? ball : new Ball(ball.isHeavy, typeof ball.index === "undefined" ? index : ball.index);
+        });
         return this;
     };
 
@@ -75,8 +79,23 @@
                 ball.$el.addClass('ball--group-1');
             } else if (ball.index < 6) {
                 ball.$el.addClass('ball--group-2');
+            } else {
+                ball.$el.addClass('ball--group-3');
             }
         });
+        return this;
+    }
+
+    BallsList.prototype.highlight = function (enable) {
+        enable = typeof enable === "undefined";
+        $(this.balls).each(function (index, ball) {
+            if (enable) {
+                ball.$el.addClass('ball--highlight');
+            } else {
+                ball.$el.removeClass('ball--highlight');
+            }
+        });
+        return this;
     }
 
     /**
@@ -104,84 +123,27 @@
     }
 
     /**
-     * @param ball
-     * @param index
-     * @param list
-     * @returns {Array}
-     */
-    function createBall(ball, index, list) {
-        list = list || balls;
-        var $ball = $('<div class="ball">');
-        if (ball.isHeavy) {
-            $ball.addClass('ball--heavy');
-        }
-        ball.index = index;
-        list.push({
-            $el: $ball,
-            ball: ball
-        });
-        return list;
-    }
-
-    /**
-     * @param $container
-     * @param list
-     */
-    function draw($container, list) {
-        list = list || balls;
-        var $balls = $container.find('.balls').empty();
-        $(list).each(function (index, ball) {
-            ball.$el.text(typeof ball.ball.index === "undefined" ? index : ball.ball.index);
-            $balls.append(ball.$el.clone());
-        });
-    }
-
-    /**
-     * @param list
-     */
-    function refreshBalls(list) {
-        balls = [];
-        $(list).each(function (index, ball) {
-            createBall(ball, typeof ball.index === "undefined" ? index : ball.index);
-        });
-    }
-
-    /**
-     * @param ballsList
-     */
-    function prepareColors(ballsList) {
-        $(ballsList).each(function (index, ball) {
-            if (ball.ball.index < 3) {
-                ball.$el.addClass('ball--group-1');
-            } else if (ball.ball.index < 6) {
-                ball.$el.addClass('ball--group-2');
-            }
-        });
-    }
-
-    /**
      * @param callback
      * @param replay
      */
-    function nextStep(callback, replay) {
+    function step(callback, replay) {
         replay = replay || 0;
+
         if (replay) {
-            step = 1;
+            currentStep = 1;
         }
 
         var $steps = $('.step').removeClass('step--current'),
-            $currentStep = $('.step-' + step).addClass('step--current'),
-            $stepResult = $currentStep.find('.step__result');
+            $currentStep = $('.step-' + currentStep).addClass('step--current');
 
-        if (step > 1) {
+        if (currentStep > 1) {
             $currentStep.fadeIn();
-            // draw($currentStep);
             $('.steps')
-                .removeClass('steps--step-' + (step - 1))
-                .addClass('steps--step-' + step);
+                .removeClass('steps--step-' + (currentStep - 1))
+                .addClass('steps--step-' + currentStep);
         }
 
-        switch (step++) {
+        switch (currentStep++) {
             case 1:
                 $steps.fadeOut().promise().done(function () {
                     $('#start').prop('disabled', true);
@@ -193,77 +155,51 @@
                                     callback.call(this, data);
                                 }
                             });
-                            ballsList = new BallsList(data.balls);
-                            ballsDraw = new Draw(ballsList);
-                            ballsDraw.render($currentStep.find('.balls'));
-                            // refreshBalls(data.balls);
-                            // draw($currentStep);
+                            draw = new Draw(new BallsList(data.balls));
+                            draw.render($currentStep.find('.balls'));
                         });
                     });
                 });
                 break;
 
+            case 2:
+                draw.list.part(0, 6).paint();
+                draw.render($currentStep.find('.balls'));
+                break;
+
             case 3:
+                draw.list.part(6, 9).highlight();
+                draw.render($currentStep.find('.step__content .balls'));
                 sendRequest('weigh', {
-                    balls1: JSON.stringify(balls.slice(0, 3).map(function (ball) {
-                        return ball.ball;
-                    })),
-                    balls2: JSON.stringify(balls.slice(3, 6).map(function (ball) {
-                        return ball.ball;
-                    })),
+                    balls1: JSON.stringify(draw.list.part(0, 3).data()),
+                    balls2: JSON.stringify(draw.list.part(3, 6).data()),
                 }, function (data) {
                     if (data.balls.length === 0) {
-                        $stepResult.find('.variant-equal').fadeIn();
-                        // refreshBalls(balls.slice(6, 9).map(function (ball) {
-                        //     return ball.ball;
-                        // }));
+                        $currentStep.find('.variant-equal').fadeIn();
+                        draw.list = draw.list.part(6, 9)
                     } else {
-                        ballsList.loadBalls(data.balls).paint();
-                        ballsDraw.render($currentStep.find('.balls'));
-                        // refreshBalls(data.balls);
-                        // prepareColors(balls);
-                        // draw($stepResult);
-                        $stepResult.find('.variant-balls').fadeIn();
-                    }
-                    $(balls).each(function (index, ball) {
-                        if (index > 1) {
-                            ball.$el.addClass('ball--group-3');
-                        }
-                    });
-                });
-                $currentStep.find('.ball').each(function (index, el) {
-                    if (index > 5) {
-                        $(this).addClass('ball--group-3');
-                    }
-                });
-
-            case 2:
-                $currentStep.find('.ball').each(function (index, el) {
-                    if (index < 3) {
-                        $(this).addClass('ball--group-1');
-                    } else if (index < 6) {
-                        $(this).addClass('ball--group-2');
+                        draw.list.loadBalls(data.balls).paint();
+                        draw.render($currentStep.find('.step__result .balls'));
+                        $currentStep.find('.variant-balls').fadeIn();
                     }
                 });
                 break;
 
             case 4:
+                draw.list.highlight(false).part(2, 3).highlight();
+                draw.render($currentStep.find('.step__content .balls'));
                 sendRequest('weigh', {
-                    balls1: JSON.stringify([balls[0].ball]),
-                    balls2: JSON.stringify([balls[1].ball])
+                    balls1: JSON.stringify([draw.list.balls[0].data()]),
+                    balls2: JSON.stringify([draw.list.balls[1].data()])
                 }, function (data) {
                     if (data.balls.length === 0) {
-                        $stepResult.find('.variant-equal').fadeIn();
-                        balls = createBall(balls[2].ball, balls[2].ball.index, []);
-                        prepareColors(balls);
-                        $('.js__heavy-ball').text(tBall.ball.index);
+                        $currentStep.find('.variant-equal').fadeIn();
+                        $('.js__heavy-ball').text(draw.list.balls[2].index);
                     } else {
-                        $stepResult.find('.variant-balls').fadeIn();
-                        balls = [];
-                        createBall(data.balls[0], data.balls[0].index);
-                        prepareColors(balls);
-                        draw($stepResult);
+                        draw.list.loadBalls(data.balls).paint();
+                        draw.render($currentStep.find('.step__result .balls'));
                         $('.js__heavy-ball').text(data.balls[0].index);
+                        $currentStep.find('.variant-balls').fadeIn();
                     }
                 });
                 break;
@@ -287,25 +223,25 @@
                 index: parseInt($(this).text())
             }, function (data) {
                 notify('Action "' + data.actionLabel + '" is saved.');
-                refreshBalls(data.balls);
+                draw.list.loadBalls(data.balls);
+            });
+        });
+
+        $('#start').click(function () {
+            step(function (data) {
+                notify('Action "' + data.actionLabel + '" is saved.<br>Game #' + data.gameId);
             });
         });
 
         $('#replay').click(function () {
-            nextStep(function (data) {
+            step(function (data) {
                 $('.variant').fadeOut();
                 notify('Action "' + data.actionLabel + '" is saved.<br>Game #' + data.gameId);
             }, true);
         });
 
-        $('#start').click(function () {
-            nextStep(function (data) {
-                notify('Action "' + data.actionLabel + '" is saved.<br>Game #' + data.gameId);
-            });
-        });
-
         $('#next').click(function () {
-            nextStep();
+            step();
         });
     });
 })();

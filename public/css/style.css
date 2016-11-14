@@ -74,7 +74,7 @@ body, html {
 .ball.ball--group-2 {
     background-color: #6cbcff;
 }
-.ball.ball--group-3 {
+.ball.ball--highlight {
     opacity: .5;
 }
 
