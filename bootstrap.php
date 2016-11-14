@@ -20,7 +20,7 @@ $dbConfig = $phinxConfig['environments'][$phinxConfig['environments']['default_d
 
 $db = new \PDO($dbConfig['adapter'] . ':dbname=' . $dbConfig['name'] . ';host=' . $dbConfig['host'], $dbConfig['user'], $dbConfig['pass']);
 
-$game = new Game(new BallManager(), new GameLog($db));
+$game = new \app\Game(new \app\BallManager(), new \app\GameLog($db));
 
 // ajax handlers
 require_once 'handlers.php';
