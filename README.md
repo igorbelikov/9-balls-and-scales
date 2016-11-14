@@ -8,7 +8,7 @@ DEMO:
 http://dev.ibelik.com/9balls/
 
 Screenshot:
-![alt tag](http://dev.ibelik.com/9balls/screenshoot.png)
+![alt tag](http://dev.ibelik.com/9balls/data/screenshoot.png)
 
 Screenshot, scheme and dump located in the `data` directory.
 
