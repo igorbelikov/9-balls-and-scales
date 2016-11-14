@@ -1,5 +1,10 @@
 <?php
 
+use app\Ball;
+use app\BallManager;
+use app\Response;
+use app\Scales;
+
 /**
  * Class BallsTest
  */

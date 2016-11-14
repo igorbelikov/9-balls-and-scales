@@ -1,5 +1,9 @@
 <?php
 
+use app\GameLog;
+use app\Response;
+use app\Scales;
+
 if (isset($_POST['action'], $_POST['replay']) && $_POST['action'] == 'start')
 {
     $game->start();
