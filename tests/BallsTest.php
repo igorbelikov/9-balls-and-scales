@@ -43,4 +43,22 @@ class BallsTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey('success', $data);
         $this->assertArrayHasKey('data', $data);
     }
+
+    public function testScales()
+    {
+        $scales = new Scales();
+        $this->assertEquals([new Ball(true)], $scales->weigh(
+            [new Ball(true)],
+            [new Ball(false)]
+        ));
+        $heavyBalls = [new Ball(true), new Ball(false)];
+        $this->assertEquals($heavyBalls, $scales->weigh(
+            $heavyBalls,
+            [new Ball(false), new Ball(false)]
+        ));
+        $this->assertEquals([], $scales->weigh(
+            [new Ball(false)],
+            [new Ball(false)]
+        ));
+    }
 }
