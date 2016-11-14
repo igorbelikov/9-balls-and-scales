@@ -37,3 +37,12 @@ if (isset($_POST['action'], $_POST['index']) && $_POST['action'] == 'mark-as-hea
         'actionLabel' => GameLog::getLabels(GameLog::ACTION_CHANGE_HEAVY_BALL)
     ], $game->markAsHeavy($_POST['index']));
 }
+
+if (isset($_POST['action'], $_POST['step']) && $_POST['action'] == 'nextStep')
+{
+    if ($_POST['step'] == 5) {
+        echo new Response([
+            'actionLabel' => GameLog::getLabels(GameLog::ACTION_END)
+        ], $game->end());
+    }
+}

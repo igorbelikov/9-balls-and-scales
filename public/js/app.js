@@ -206,6 +206,9 @@
 
             case 5:
                 $('#next').prop('disabled', true);
+                sendRequest('nextStep', {step: 5}, function (data) {
+                    notify('Action "' + data.actionLabel + '" is saved.');
+                });
                 break;
         }
     }
