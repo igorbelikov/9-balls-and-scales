@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/igorbelikov/9-balls-and-scales.svg?branch=master)](https://travis-ci.org/igorbelikov/9-balls-and-scales)
+
 # 9 balls and scales
 You have 9 balls, equally big, equally heavy - except for one, which is a little heavier.
 How would you identify the heavier ball if you could use a pair of balance scales only twice?
