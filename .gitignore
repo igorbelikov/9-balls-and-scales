@@ -60,3 +60,4 @@ build/
 dist/
 .idea
 phinx.yml
+.DS_Store
