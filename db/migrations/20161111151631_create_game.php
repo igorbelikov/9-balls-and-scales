@@ -30,7 +30,7 @@ class CreateGame extends AbstractMigration
     {
         $table = $this->table('game');
         $table
-            ->addColumn('created', PdoAdapter::PHINX_TYPE_STRING)
+            ->addColumn('created', PdoAdapter::PHINX_TYPE_INTEGER)
             ->create();
     }
     /**
